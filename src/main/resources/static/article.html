@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Member Article</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+
+</head>
+<body>
+
+
+<div class="container mt-5">
+    <h3>文章編輯區</h3>
+    <div class="row">
+
+        <div class="col-3">
+
+            <p>張大熊 您好</p>
+            <p>自傳</p>
+        </div>
+        <div class="col-8">
+            <label for="exampleFormControlTextarea1" class="form-label">想發表什麼文章呢</label>
+            <textarea class="form-control" id="exampleFormControlTextarea1" rows="3"></textarea>
+            <br>
+            <button type="submit" class="btn btn-primary">確認發佈</button>
+        </div>
+
+    </div>
+
+    <hr>
+    <h3>文章專區</h3>
+    <div class="row" id="app">
+        <div class="col-3">
+            <!-- space -->
+        </div>
+        <div class="col-8">
+            <div>
+                <div class="card">
+                    <div class="card-header">
+                        Featured
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title">Special title treatment</h5>
+                        <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
+                        <a href="#" class="btn btn-primary">留言</a>
+
+                        <hr>
+                        <div>評論
+                            <p class="card-text">這邊是評論</p>
+                        </div>
+
+                    </div>
+
+                    <!--按下修改文章，則跳至文章修改頁面-->
+
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+    </div>
+</div>
+
+<!-- -------------------------------------------------- Lib ------------------------------------------------- -->
+
+<!-- sweetAlert -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<!-- vue.js -->
+<script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+
+<!-- axios -->
+<script src="https://cdn.jsdelivr.net/npm/axios@0.21.1/dist/axios.min.js"></script>
+
+<!-- app.js -->
+<script src="app.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>registration</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+
+</head>
+<body>
+
+
+<div id="app" class="container mt-5">
+    <div class="row">
+
+        <div class="col">
+            <!-- space -->
+        </div>
+
+        <!-- Registration Zone -->
+        <div class="col">
+
+            <h2> Registration </h2>
+
+            <!--User Name -->
+            <label for="userName" class="form-label">User Name</label>
+            <input v-model="userName" placeholder="User Name" @keyup.enter="register" class="form-control"
+                   :class="{ 'is-invalid': !isValidUserName }" id="userName"/>
+            <!-- UserName Invalid -->
+            <div v-if="!isValidUserName" class="invalid-feedback">Invalid User Name </div>
+
+            <!-- Mobile Number -->
+            <label for="registerMobile" class="form-label">Mobile Number</label>
+            <input v-model="registerMobile" placeholder="Mobile number" @keyup.enter="register" class="form-control"
+                   :class="{ 'is-invalid': !isValidMobile }" id="registerMobile"/>
+
+            <!-- Mobile Number Invalid -->
+            <div v-if="!isValidMobile" class="invalid-feedback">Invalid Mobile Number </div>
+
+            <!-- Email -->
+            <label for="registerEmail" class="form-label">Email</label>
+            <input v-model="registerEmail" type="email" placeholder="Email" @keyup.enter="register" class="form-control mb-2"
+                   :class="{ 'is-invalid': !isValidEmail }" id="registerEmail"/>
+
+            <!-- Email Invalid-->
+            <div v-if="!isValidEmail" class="invalid-feedback">Please enter a valid email address.</div>
+
+            <!-- Password -->
+            <label for="registerPassword" class="form-label">Password</label>
+            <input v-model="registerPassword" type="password" placeholder="Password" @keyup.enter="register" class="form-control mb-2"
+                   :class="{ 'is-invalid': !isValidPassword }" id="registerPassword"/>
+
+            <!-- Password Invalid -->
+            <div v-if="!isValidPassword" class="invalid-feedback">Password must contain at least one lowercase letter,
+                one uppercase letter, one digit, and be between 6 and 20 characters in length.
+            </div>
+
+            <!-- Button Register -->
+            <button @click="register" class="btn btn-primary mb-2">Register</button>
+
+        </div>
+
+
+        <div class="col">
+            <!-- Space -->
+        </div>
+
+
+    </div>
+</div>
+
+<!-- -------------------------------------------------- Lib ------------------------------------------------- -->
+
+<!-- sweetAlert -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<!-- vue.js -->
+<script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+
+<!-- axios -->
+<script src="https://cdn.jsdelivr.net/npm/axios@0.21.1/dist/axios.min.js"></script>
+
+<!-- app.js -->
+<script src="app.js"></script>
+
+</body>
+</html>
