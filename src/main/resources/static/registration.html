@@ -12,10 +12,7 @@
 
 <div id="app" class="container mt-5">
     <div class="row">
-
-        <div class="col">
-            <!-- space -->
-        </div>
+        <div class="col"> <!-- space --> </div>
 
         <!-- Registration Zone -->
         <div class="col">
@@ -26,34 +23,45 @@
             <label for="userName" class="form-label">User Name</label>
             <input v-model="userName" placeholder="User Name" @keyup.enter="register" class="form-control"
                    :class="{ 'is-invalid': !isValidUserName }" id="userName"/>
+
             <!-- UserName Invalid -->
             <div v-if="!isValidUserName" class="invalid-feedback">Invalid User Name </div>
 
             <!-- Mobile Number -->
-            <label for="registerMobile" class="form-label">Mobile Number</label>
-            <input v-model="registerMobile" placeholder="Mobile number" @keyup.enter="register" class="form-control"
-                   :class="{ 'is-invalid': !isValidMobile }" id="registerMobile"/>
+            <label for="mobile" class="form-label">Mobile Number</label>
+            <input v-model="mobile" placeholder="Mobile number" @keyup.enter="register" class="form-control"
+                   :class="{ 'is-invalid': !isValidMobile }" id="mobile"/>
 
             <!-- Mobile Number Invalid -->
             <div v-if="!isValidMobile" class="invalid-feedback">Invalid Mobile Number </div>
 
             <!-- Email -->
-            <label for="registerEmail" class="form-label">Email</label>
-            <input v-model="registerEmail" type="email" placeholder="Email" @keyup.enter="register" class="form-control mb-2"
-                   :class="{ 'is-invalid': !isValidEmail }" id="registerEmail"/>
+            <label for="email" class="form-label">Email</label>
+            <input v-model="email" type="email" placeholder="Email" @keyup.enter="register" class="form-control mb-2"
+                   :class="{ 'is-invalid': !isValidEmail }" id="email"/>
 
             <!-- Email Invalid-->
             <div v-if="!isValidEmail" class="invalid-feedback">Please enter a valid email address.</div>
 
             <!-- Password -->
-            <label for="registerPassword" class="form-label">Password</label>
-            <input v-model="registerPassword" type="password" placeholder="Password" @keyup.enter="register" class="form-control mb-2"
-                   :class="{ 'is-invalid': !isValidPassword }" id="registerPassword"/>
+            <label for="password" class="form-label">Password</label>
+            <input v-model="password" type="password" placeholder="Password" @keyup.enter="register" class="form-control mb-2"
+                   :class="{ 'is-invalid': !isValidPassword }" id="password"/>
 
             <!-- Password Invalid -->
             <div v-if="!isValidPassword" class="invalid-feedback">Password must contain at least one lowercase letter,
                 one uppercase letter, one digit, and be between 6 and 20 characters in length.
             </div>
+
+            <!-- Biography -->
+            <div class="form-floating">
+                <label for="biography"> Autobiography </label>
+                <textarea v-model="biography" class="form-control" id="biography" style="height: 100px"
+                          :class="{ 'is-invalid': !biography }"></textarea>
+            </div>
+            <div v-if="!biography" class="invalid-feedback">Autobiography cannot be empty</div>
+
+
 
             <!-- Button Register -->
             <button @click="register" class="btn btn-primary mb-2">Register</button>
@@ -81,7 +89,131 @@
 <script src="https://cdn.jsdelivr.net/npm/axios@0.21.1/dist/axios.min.js"></script>
 
 <!-- app.js -->
-<script src="app.js"></script>
+<!--<script src="app.js"></script>-->
+
+<script>
+    new Vue({
+        el: '#app',
+        data:{
+            userName: '',
+            mobile:'',
+            password: '',
+            email: '',
+            biography: ''
+        },
+        methods:{
+
+            // Register
+            register() {
+
+                // Username: 3-16 characters sense insensitive
+                const userNameRegex = /^[a-zA-Z0-9_-]{3,16}$/;
+
+                // mobile : fit 09xxxxxxxx
+                const mobileRegex = /^09\d{8}$|^09\d{9}$/;
+
+                // Email: xxx@xxxx.com
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+                // Password: length 6-20, included 1 number, 1 character in lower case, 1 character in upper case,
+                const passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,20}$/;
+
+                // Verify the input by regular expressions
+                if (userNameRegex.test(this.userName) &&
+                    mobileRegex.test(this.mobile)&&
+                    emailRegex.test(this.email) &&
+                    passwordRegex.test(this.password)&& this.biography) {
+
+                    // Pack input data
+                    let user = {
+                        userName: this.userName,
+                        mobile: this.mobile,
+                        email: this.email,
+                        password: this.password,
+                        biography: this.biography
+                    };
+
+                    // Sent request
+                    axios.post('/register', user)
+                        .then(response => {
+                            if (response.data) {
+                                Swal.fire({
+                                    title: 'Registration Successful',
+                                    text: 'Please login',
+                                    icon: 'success',
+                                    timer: 1000,
+                                    showConfirmButton: false
+
+                                }).then((result) => {
+                                    // Redirect after modal closed
+                                    if (result.dismiss === Swal.DismissReason.timer) {
+                                        window.location.href = 'http://localhost:8080/login.html'; // 设置跳转的目标页面 URL
+                                    }
+                                }).catch(error => {
+                                    // Handling fetching error
+                                    console.error('Error:', error);
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: 'Error',
+                                        text: 'An error occurred. Please try again later.',
+                                    });
+                                });
+
+                            } else {
+                                // Phone is already registered
+                                Swal.fire({
+                                    position: 'top',
+                                    title: 'This mobile number is already registered',
+                                    timer: 1500,
+                                    showConfirmButton: false,
+                                });
+                            }
+                        });
+                } else {
+                    // Invalid input
+                    Swal.fire({
+                        position: 'top',
+                        title: 'Invalid input',
+                        timer: 1500,
+                        showConfirmButton: false,
+                    });
+                }
+            },
+
+        },
+
+        computed: {
+            // Verify username
+            isValidUserName() {
+                const userNameRegex = /^[a-zA-Z0-9_-]{3,16}$/;
+                return this.userName && userNameRegex.test(this.userName);
+            },
+
+            // Verify mobile number
+            isValidMobile() {
+                const mobileRegex = /^09\d{8}$|^09\d{9}$/;
+                return this.mobile && mobileRegex.test(this.mobile);
+            },
+
+            // Verify email
+            isValidEmail() {
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                return this.email && emailRegex.test(this.email);
+            },
+
+            // Verify password
+            isValidPassword() {
+                const passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,20}$/;
+                return this.password && passwordRegex.test(this.password);
+            }
+        },
+
+
+    });
+
+</script>
+
+
 
 </body>
 </html>

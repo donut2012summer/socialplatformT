@@ -10,34 +10,50 @@
 <body>
 
 
-<div class="container mt-5" id="app">
+<div class="container mt-5" id="app1">
     <div class="row">
 
         <div class="col">
-            <!---->
+            <!-- Blank -->
         </div>
 
         <div class="col">
-            <h2>Log In </h2>
-            <label for="userId" class="form-label">帳號</label>
-            <input type="text" class="form-control" id="userId" placeholder="帳號">
 
-            <label for="password" class="form-label">密碼</label>
-            <input type="text" class="form-control" id="password" placeholder="密碼">
+            <h2>Log In </h2>
+
+            <!-- Mobile -->
+            <label for="mobile" class="form-label">Mobile Number</label>
+            <input v-model="mobile" placeholder="Mobile number" @keyup.enter="login" class="form-control"
+                   :class="{ 'is-invalid': !isValidMobile }" id="mobile"/>
+
+            <!-- Mobile Number Invalid -->
+            <div v-if="!isValidMobile" class="invalid-feedback">Invalid Mobile Number </div>
+
+            <!-- Password -->
+            <label for="password" class="form-label">Password</label>
+            <input v-model="password" type="password" placeholder="Password" @keyup.enter="login" class="form-control mb-2"
+                   :class="{ 'is-invalid': !isValidPassword }" id="password"/>
+
+            <!-- Password Invalid -->
+            <div v-if="!isValidPassword" class="invalid-feedback">Password must contain at least one lowercase letter,
+                one uppercase letter, one digit, and be between 6 and 20 characters in length.
+            </div>
+
 
             <p>若您沒有帳號，請點<a href="https://www.example.com">註冊</a>前往創立帳號</p>
-            <button type="submit" class="btn btn-primary">Sign in</button>
+            <button @click="login" type="submit" class="btn btn-primary">Sign in</button>
 
         </div>
 
 
         <div class="col">
-            <!---->
+            <!-- Blank -->
         </div>
     </div>
 </div>
 
 <!-- -------------------------------------------------- Lib ------------------------------------------------- -->
+
 
 <!-- sweetAlert -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -49,7 +65,83 @@
 <script src="https://cdn.jsdelivr.net/npm/axios@0.21.1/dist/axios.min.js"></script>
 
 <!-- app.js -->
-<script src="app.js"></script>
+<!--<script src="app.js"></script>-->
+
+
+<script>
+    new Vue({
+        el: '#app1',
+        data: {
+            mobile: '',
+            password: ''
+        },
+        methods: {
+            login() {
+
+                // Verified Input
+                const mobileRegex = /^09\d{8}$|^09\d{9}$/;
+                const passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,20}$/;
+
+                // If Input verified
+                if (mobileRegex.test(this.mobile) && passwordRegex.test(this.password)) {
+
+                    // Pack Data
+                    let user = {
+                        mobile: this.mobile,
+                        password: this.password,
+                    };
+
+                    // Sent Request
+                    axios.post('/login', user).then(response =>
+                    {
+                        if (response.data) {
+                            // 登入成功，放入user資料
+                            sessionStorage.setItem('userId', JSON.stringify(response.data));
+                            Swal.fire({
+                                title: 'Registration Successful',
+                                text: 'Please login',
+                                icon: 'success',
+                                timer: 1000, // 设置弹窗自动关闭的时间，单位为毫秒
+                                showConfirmButton: false // 隐藏确认按钮
+                            }).then((result) => {
+                                // 在 SweetAlert 弹窗关闭后执行跳转
+                                if (result.dismiss === Swal.DismissReason.timer) {
+                                    window.location.href = 'http://localhost:8080/article.html'; // 设置跳转的目标页面 URL
+                                }
+                            });
+
+                        } else {
+                            Swal.fire({
+                                position: 'top',
+                                title: 'Login failed',
+                                timer: 1500,
+                                showConfirmButton: false,
+                                background: 'rgba(255, 255, 255, .7)'
+                            });
+                        }
+                    });
+                }
+            }
+        },
+        computed: {
+            // Verify mobile number
+            isValidMobile() {
+                const mobileRegex = /^09\d{8}$|^09\d{9}$/;
+                return this.mobile && mobileRegex.test(this.mobile);
+            },
+
+            // Verify mobile number
+            isValidPassword() {
+                const passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,20}$/;
+                return this.password && passwordRegex.test(this.password);
+            }
+        }
+    });
+
+
+</script>
+
+
 
 </body>
 </html>

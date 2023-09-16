@@ -10,50 +10,78 @@
 <body>
 
 
-<div class="container mt-5">
+<div class="container mt-5" id="appArticle">
+
+    <!-- -------------------  文章編輯區 -------------------------- -->
     <h3>文章編輯區</h3>
     <div class="row">
 
         <div class="col-3">
-
-            <p>張大熊 您好</p>
+            <p>{{ memberName}}您好</p>
             <p>自傳</p>
+
         </div>
         <div class="col-8">
-            <label for="exampleFormControlTextarea1" class="form-label">想發表什麼文章呢</label>
-            <textarea class="form-control" id="exampleFormControlTextarea1" rows="3"></textarea>
+            <label for="content" class="form-label">想發表什麼文章呢</label>
+            <textarea v-model="content" class="form-control" id="content" rows="3"></textarea>
+
             <br>
-            <button type="submit" class="btn btn-primary">確認發佈</button>
+            <button @click="postArticle"
+                    type="submit" class="btn btn-primary">確認發佈</button>
         </div>
 
     </div>
 
     <hr>
+
+    <!-- -------------------  文章專區 -------------------------- -->
     <h3>文章專區</h3>
-    <div class="row" id="app">
-        <div class="col-3">
-            <!-- space -->
-        </div>
+
+    <div class="row">
+        <div class="col-3"> <!-- space --> </div>
+
         <div class="col-8">
             <div>
-                <div class="card">
-                    <div class="card-header">
-                        Featured
-                    </div>
-                    <div class="card-body">
-                        <h5 class="card-title">Special title treatment</h5>
-                        <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
-                        <a href="#" class="btn btn-primary">留言</a>
 
-                        <hr>
-                        <div>評論
-                            <p class="card-text">這邊是評論</p>
+                <!-- Get posts and render in the page -->
+                <div class="card" v-for="post in posts" :key="post.postId">
+
+                    <!-- Blank -->
+                    <div class="card-header"></div>
+
+                    <!--post body-->
+                    <div class="card-body">
+                        <p class="card-text">{{post.content}}</p>
+                        <p class="card-text" style="font-size: 10px"> Created by: {{post.userName}} ,
+                            Created At: {{post.createdAt}}</p>
+
+                        <!-- Edite Post -->
+                        <button v-if="post.userId === userId" class="btn btn-primary btn-sm"
+                                @click="editPost(post)"> Edit </button>
+
+                        <!-- Delete Post -->
+                        <button v-if="post.userId === userId" class="btn btn-danger btn-sm"
+                                @click="deletePost(post.postId)" id="deleteBtn"> Delete </button>
+
+                        <!-- Add Message -->
+                        <button class="btn btn-primary btn-sm"
+                                @click="addComment(post)"> Add Comment </button>
+
+                        <!-- Toggle Message -->
+                        <button class="btn btn-primary btn-sm"
+                                @click="toggleComments(post)">Show Comments
+                        </button>
+
+                        <!-- Message body-->
+                        <div v-for="comment in comments" :key="comment.commentId" >
+                            <div :class="['collapse', { 'show': isCollapsed }]" class="card card-body mt-3">
+                                <p style="font-size: 16px">
+                                    {{ comment.content }}
+                                    Created by:
+                                </p> </div>
                         </div>
 
                     </div>
-
-                    <!--按下修改文章，則跳至文章修改頁面-->
-
 
                 </div>
 
@@ -61,8 +89,8 @@
 
         </div>
 
-
     </div>
+
 </div>
 
 <!-- -------------------------------------------------- Lib ------------------------------------------------- -->
@@ -76,8 +104,324 @@
 <!-- axios -->
 <script src="https://cdn.jsdelivr.net/npm/axios@0.21.1/dist/axios.min.js"></script>
 
-<!-- app.js -->
-<script src="app.js"></script>
+<script>
+
+new Vue({
+    el:'#appArticle',
+    data:{
+        // Get user id in session storage
+        userId: parseInt(sessionStorage.getItem('userId')),
+
+        // Keep username in session storage
+        memberName: '',
+
+        // Map to content element
+        content: '',
+
+        posts: [],
+        comments: [],
+
+        // Flag for comment toggling
+        isCollapsed: false,
+
+    },
+
+    //mounted: trigger getPosts when DOM content loaded
+    mounted:function (){
+        this.getPosts();
+    },
+
+    methods:{
+
+        /* ------------- Post --------------- */
+        // Get All Posts
+        getPosts(){
+            // Get request
+            axios.get('/getPosts')
+                 .then(response => {
+
+                     // Set response data to posts[] for rendering by Vue in teh DOM tree
+                    this.posts = response.data;
+
+                }).catch(error => {
+                    // Handle error
+                    console.error('Error:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error fetching posts',
+                        text: 'An error occurred while fetching posts. Please try again later.',
+                    });
+            });
+        },
+
+        // Post Article
+        postArticle() {
+            // Verify Content and login
+            if (!this.content || !this.userId) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Content are required!',
+                    text: 'Please fill in all the fields.',
+                });
+                return;
+            }
+
+            // Pack data
+            let post = {
+                userId: this.userId,
+                content: this.content,
+            };
+
+            // Post request
+            axios.post('/postArticle', post)
+                 .then(response => {
+
+                     // If connection success
+                    if (response.status === 200) {
+                        Swal.fire({
+                            position: 'top-end',
+                            icon: 'success',
+                            title: 'Successfully published!',
+                            showConfirmButton: false,
+                            timer: 1500,
+                        });
+
+                        // Reset content
+                        this.content = '';
+
+                    } else {
+
+                        // If request failed
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Failed to publish, please try again',
+                            text: 'Something went wrong!',
+                        });
+
+                    }
+                })
+                .catch(error => {
+                    // Handle Fetching Error
+                    console.error('Error:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error fetching posts',
+                        text: 'An error occurred while fetching posts. Please try again later.',
+                    });
+                });
+        },
+
+        // Edite Posts
+        editPost(post) {
+
+            // Text modal for editing post
+            Swal.fire({
+                title: 'Edit Content',
+                input: 'textarea',
+                inputValue: post.content,
+                showCancelButton: true,
+                confirmButtonText: 'Save',
+                cancelButtonText: 'Cancel',
+
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Update value of the post content
+                    post.content = result.value;
+
+                    // Post request
+                    axios.post('/posts', post)
+                         .then(response => {
+                             if (response.status === 200) {
+                                 Swal.fire({
+                                     position: 'top-end',
+                                     icon: 'success',
+                                     title: 'Successfully modified!',
+                                     showConfirmButton: false,
+                                     timer: 1500,
+                                 });
+
+                                 // Render page again
+                                 this.getPosts();
+
+                            } else {
+                                 Swal.fire({
+                                     icon: 'error',
+                                     title: 'Fail to edit, please try again!',
+                                     text: 'An error occurred while editing the post. Please try again later.',
+                                 });
+                            }
+                        }).catch(error => {
+                            // Handling error
+                            console.error('Error:', error);
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error editing post',
+                                text: 'An error occurred while editing the post. Please try again later.',
+                            });
+                    });
+                }
+            });
+        },
+
+        // Delete Post
+        deletePost(postId) {
+
+            // Modal to check delete
+            Swal.fire({
+                title: 'Confirmed Delete?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, please delete',
+                cancelButtonText: 'Cancel',
+
+            }).then((result) => {
+
+                // isConfirmed: when user confirmed delete
+                if (result.isConfirmed) {
+
+                    // Send request
+                    axios.get(`/deletePost/${postId}`)
+                        .then(response => {
+                            if (response.status === 200) {
+                                Swal.fire({
+                                    position: 'top-end',
+                                    icon: 'success',
+                                    title: 'Successfully deleted!',
+                                    showConfirmButton: false,
+                                    timer: 1500,
+                                });
+
+                                // Render page again
+                                this.getPosts();
+
+                            } else {
+                                // Fail to delete
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Failed to delete, please try again',
+                                    text: 'Something went wrong!',
+                                });
+
+                            }
+                        }).catch(error => {
+                            // Handle fetching error
+                            console.error('Error:', error);
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error deleting post',
+                                text: 'An error occurred while deleting the post. Please try again later.',
+                            });
+
+                    });
+                }
+            });
+        },
+
+        // Formate Date
+
+
+        /* ------------- Comment --------------- */
+        // Add comment
+        addComment(post) {
+            Swal.fire({
+                title: 'Add Comment',
+                input: 'textarea',
+                showCancelButton: true,
+                confirmButtonText: 'Save',
+                cancelButtonText: 'Cancel',
+
+            }).then((result) => {
+                // If confirmed create comment
+                if (result.isConfirmed) {
+
+                    // Check if the text area is not null
+                    if (result.value) {
+
+                        // Pack data
+                        let comment ={
+                            userId: this.userId,
+                            postId: post.postId,
+                            content: result.value
+                        }
+
+                        // Post request to add comment
+                        axios.post('/addComment', comment)
+                             .then(response => {
+                                if (response.status === 200) {
+                                    Swal.fire({
+                                        position: 'top-end',
+                                        icon: 'success',
+                                        title: 'Comment successfully added!',
+                                        showConfirmButton: false,
+                                        timer: 1500,
+                                    });
+
+                                    // Render page again
+                                    this.getPosts();
+
+                                } else {
+                                    // Fail to edit
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: 'Failed to add comment, please try again',
+                                        text: 'Something went wrong!',
+                                    });
+
+                                }
+                            }).catch(error => {
+                                // Handle fetching error
+                                console.error('Error:', error);
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Error adding comment',
+                                    text: 'An error occurred while adding the comment. Please try again later.',
+                                });
+
+                        });
+                    } else {
+                        // Else if comment is null
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Comment cannot be empty',
+                            showConfirmButton: false,
+                            timer: 1500
+                        })
+
+                    }
+                }
+            });
+        },
+
+        // Get comments
+        toggleComments(post) {
+
+            // Convert flag of isCollapsed when click the button
+            this.isCollapsed = !this.isCollapsed;
+
+            // If isCollapsed is true
+            if (this.isCollapsed) {
+
+                // GET request
+                axios.get(`/getCommentsByPostId/${post.postId}`)
+                    .then(response => {
+                        // Update comments
+                        this.comments = response.data;
+
+                    })
+                    .catch(error => {
+                        // Handle error
+                        console.error('Error:', error);
+
+                    });
+            }
+        }
+
+    }
+})
+
+</script>
+
+
 
 </body>
 </html>

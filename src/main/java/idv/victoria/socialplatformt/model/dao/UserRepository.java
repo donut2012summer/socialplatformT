@@ -14,7 +14,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Integer hasMobileExists(@Param("p_mobile") String mobile);
 
 
-    // Save or Update if user_id is null
+    // Save or Update if userId is null
     @Procedure(name = "SaveOrUpdateUser")
     void saveOrUpdateUser(@Param("p_user_id") Long userId,
                           @Param("p_user_name") String userName,
@@ -29,6 +29,14 @@ public interface UserRepository extends JpaRepository<User, Long> {
     User findUserByMobile(@Param("p_mobile") String mobile);
 
 
+    // Check if User Verified
+    @Procedure(name = "HasUserVerified")
+    User hasUserVerified(@Param("p_mobile") String mobile,
+                         @Param("p_password") String password);
+
+
+    @Procedure(name = "FindUserByPostId")
+    String findUserByPostId(@Param("p_post_id") Long postId);
 
 
 }

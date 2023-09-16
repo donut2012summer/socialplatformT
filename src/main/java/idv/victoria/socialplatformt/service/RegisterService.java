@@ -45,7 +45,6 @@ public class RegisterService {
         }
     }
 
-
     @Transactional
     public User findUser(String mobile) {
         try {

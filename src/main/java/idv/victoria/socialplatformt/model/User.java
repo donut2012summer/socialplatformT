@@ -38,6 +38,24 @@ import org.springframework.data.jpa.repository.query.Procedure;
                         @StoredProcedureParameter(mode = ParameterMode.IN, name = "p_mobile", type = String.class)
                 }
         ),
+        @NamedStoredProcedureQuery(
+                name = "HasUserVerified",
+                procedureName = "HasUserVerified",
+                resultClasses = User.class,
+                parameters = {
+                        @StoredProcedureParameter(mode = ParameterMode.IN, name = "p_mobile", type = String.class),
+                        @StoredProcedureParameter(mode = ParameterMode.IN, name = "p_password", type = String.class)
+                }
+        ),
+
+        @NamedStoredProcedureQuery(
+                name = "FindUserByPostId",
+                procedureName = "FindUserByPostId",
+                parameters = {
+                        @StoredProcedureParameter(mode = ParameterMode.IN, name = "p_post_id", type = Integer.class)
+                }
+        ),
+
 })
 @Data
 @ToString
