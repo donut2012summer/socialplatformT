@@ -1,6 +1,6 @@
-/*
-每次執行此sql都會把原本的資料表覆蓋掉
-*/
+
+
+/* Warning : this SQL commands will override the Database if existed */
 
 DROP DATABASE IF EXISTS social_platform;
 CREATE DATABASE IF NOT EXISTS social_platform;
@@ -14,12 +14,11 @@ SET FOREIGN_KEY_CHECKS=0;
 -- ----------------------------
 CREATE TABLE `user`
 (
-    `user_id`     int          NOT NULL AUTO_INCREMENT,
-    `user_name`   varchar(255) NOT NULL,
-    `mobile`       varchar(15)  NOT NULL,
-    `email`       varchar(255) NOT NULL,
-    `password`    varchar(255) NOT NULL,
-    `cover_image` longblob DEFAULT NULL,
+    `user_id`            int          NOT NULL AUTO_INCREMENT,
+    `user_name`          varchar(255) NOT NULL,
+    `mobile`             varchar(15)  NOT NULL,
+    `email`              varchar(255) NOT NULL,
+    `password`           varchar(255) NOT NULL,
     `biography`   varchar(12500) DEFAULT NULL,
     PRIMARY KEY (`user_id`),
     UNIQUE KEY `Mobile` (`mobile`)
@@ -33,7 +32,6 @@ CREATE TABLE `post`
     `post_id`    int  NOT NULL AUTO_INCREMENT,
     `user_id`    int  NOT NULL,
     `content`    varchar(12500) NOT NULL,
-    `image`      longblob,
     `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (`post_id`),
     KEY          `user_id` (`user_id`),

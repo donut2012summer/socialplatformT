@@ -93,7 +93,6 @@ public class User implements Serializable {
 
     // Hashed password
     private String password;
-    private byte[] coverImage;
     private String biography;
 
 }

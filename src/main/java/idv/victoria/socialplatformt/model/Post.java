@@ -66,7 +66,6 @@ public class Post implements Serializable {
     private Long postId;
     private Long userId;
     private String content;
-    private byte[] image;
     private Timestamp createdAt;
 
     @Transient
