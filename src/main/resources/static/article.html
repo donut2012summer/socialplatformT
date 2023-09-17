@@ -98,7 +98,7 @@
 
 
                         <!-- Add Comment -->
-                        <button v-if="post.userId === userId" class="btn btn-primary btn-sm"
+                        <button v-if="userId" class="btn btn-primary btn-sm"
                                 @click="addComment(post)"> 評論 </button>
 
                         <!-- Show Comment -->
@@ -428,6 +428,7 @@ new Vue({
 
                                         // Render page again
                                         this.getPosts();
+
 
                                     } else {
                                         // Alert fail comment
