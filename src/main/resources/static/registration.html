@@ -11,70 +11,82 @@
 
 
 <div id="app" class="container mt-5">
-    <div class="row">
-        <div class="col"> <!-- space --> </div>
 
-        <!-- Registration Zone -->
+    <div class="row">
+
+        <!-- Blank -->
+        <div class="col">
+        </div>
+
+        <!-- -------------------- Registration Zone -------------------- -->
         <div class="col">
 
-            <h2> Registration </h2>
+            <h2> 註冊 </h2>
 
             <!--User Name -->
-            <label for="userName" class="form-label">User Name</label>
-            <input v-model="userName" placeholder="User Name" @keyup.enter="register" class="form-control"
+            <label for="userName" class="form-label">名稱</label>
+            <input v-model="userName" placeholder="請輸入姓名" @keyup.enter="register" class="form-control"
                    :class="{ 'is-invalid': !isValidUserName }" id="userName"/>
 
             <!-- UserName Invalid -->
-            <div v-if="!isValidUserName" class="invalid-feedback">Invalid User Name </div>
+            <div v-if="!isValidUserName" class="invalid-feedback">須包含至少三個英文字母</div>
+
+
 
             <!-- Mobile Number -->
-            <label for="mobile" class="form-label">Mobile Number</label>
-            <input v-model="mobile" placeholder="Mobile number" @keyup.enter="register" class="form-control"
+            <label for="mobile" class="form-label">帳號</label>
+            <input v-model="mobile" placeholder="請使用手機作為帳號" @keyup.enter="register" class="form-control"
                    :class="{ 'is-invalid': !isValidMobile }" id="mobile"/>
 
             <!-- Mobile Number Invalid -->
-            <div v-if="!isValidMobile" class="invalid-feedback">Invalid Mobile Number </div>
+            <div v-if="!isValidMobile" class="invalid-feedback">手機號碼格式無效 </div>
+
+
 
             <!-- Email -->
-            <label for="email" class="form-label">Email</label>
-            <input v-model="email" type="email" placeholder="Email" @keyup.enter="register" class="form-control mb-2"
+            <label for="email" class="form-label">郵件</label>
+            <input v-model="email" type="email" placeholder="郵件" @keyup.enter="register" class="form-control mb-2"
                    :class="{ 'is-invalid': !isValidEmail }" id="email"/>
 
             <!-- Email Invalid-->
-            <div v-if="!isValidEmail" class="invalid-feedback">Please enter a valid email address.</div>
+            <div v-if="!isValidEmail" class="invalid-feedback">郵件格式無效</div>
+
+
 
             <!-- Password -->
-            <label for="password" class="form-label">Password</label>
-            <input v-model="password" type="password" placeholder="Password" @keyup.enter="register" class="form-control mb-2"
+            <label for="password" class="form-label">密碼</label>
+            <input v-model="password" type="password" placeholder="密碼" @keyup.enter="register" class="form-control mb-2"
                    :class="{ 'is-invalid': !isValidPassword }" id="password"/>
 
             <!-- Password Invalid -->
-            <div v-if="!isValidPassword" class="invalid-feedback">Password must contain at least one lowercase letter,
-                one uppercase letter, one digit, and be between 6 and 20 characters in length.
+            <div v-if="!isValidPassword" class="invalid-feedback"> 密碼長度6-20，須包含1個數字，一個大寫字母以及一個小寫字母
             </div>
+
+
 
             <!-- Biography -->
             <div class="form-floating">
-                <label for="biography"> Autobiography </label>
+                <label for="biography"> 自傳  </label>
                 <textarea v-model="biography" class="form-control" id="biography" style="height: 100px"
                           :class="{ 'is-invalid': !biography }"></textarea>
             </div>
-            <div v-if="!biography" class="invalid-feedback">Autobiography cannot be empty</div>
+
+            <!-- Biography Invalid -->
+            <div v-if="!biography" class="invalid-feedback">不可為空白</div>
 
 
-
-            <!-- Button Register -->
+            <!-- Confirm register -->
             <button @click="register" class="btn btn-primary mb-2">Register</button>
 
         </div>
 
 
+        <!-- Blank -->
         <div class="col">
-            <!-- Space -->
         </div>
 
-
     </div>
+
 </div>
 
 <!-- -------------------------------------------------- Lib ------------------------------------------------- -->
@@ -88,6 +100,8 @@
 <!-- axios -->
 <script src="https://cdn.jsdelivr.net/npm/axios@0.21.1/dist/axios.min.js"></script>
 
+
+<!-- --------------------------------------------- Java Script ------------------------------------------------- -->
 <script>
     new Vue({
         el: '#app',
@@ -100,7 +114,7 @@
         },
         methods:{
 
-            // Register
+            // Verify registration and redirect to login page
             register() {
 
                 // Username: 3-16 characters sense insensitive
@@ -119,8 +133,9 @@
                 if (userNameRegex.test(this.userName) &&
                     mobileRegex.test(this.mobile)&&
                     emailRegex.test(this.email) &&
-                    passwordRegex.test(this.password)&& this.biography) {
-
+                    passwordRegex.test(this.password)&&
+                    this.biography)
+                {
                     // Pack input data
                     let user = {
                         userName: this.userName,
@@ -133,53 +148,56 @@
                     // Sent request
                     axios.post('/register', user)
                         .then(response => {
+                            // Fetch
                             if (response.data) {
+
+                                //Alert success
                                 Swal.fire({
-                                    title: 'Registration Successful',
-                                    text: 'Please login',
+                                    title: '註冊成功，請登入',
                                     icon: 'success',
                                     timer: 1000,
                                     showConfirmButton: false
 
                                 }).then((result) => {
-                                    // Redirect after modal closed
+                                    // Redirect after alert finished
                                     if (result.dismiss === Swal.DismissReason.timer) {
-                                        window.location.href = 'http://localhost:8080/login.html'; // 设置跳转的目标页面 URL
+                                        window.location.href = '/login.html';
                                     }
+
                                 }).catch(error => {
                                     // Handling fetching error
                                     console.error('Error:', error);
-                                    Swal.fire({
-                                        icon: 'error',
-                                        title: 'Error',
-                                        text: 'An error occurred. Please try again later.',
-                                    });
+
                                 });
 
                             } else {
-                                // Phone is already registered
+                                // Alert phone registered
                                 Swal.fire({
                                     position: 'top',
-                                    title: 'This mobile number is already registered',
+                                    title: '手機號碼已經註冊過囉，請使用其他的號碼',
                                     timer: 1500,
                                     showConfirmButton: false,
                                 });
+
                             }
                         });
                 } else {
+
                     // Invalid input
                     Swal.fire({
                         position: 'top',
-                        title: 'Invalid input',
+                        title: '無效的輸入',
                         timer: 1500,
                         showConfirmButton: false,
                     });
+
                 }
             },
 
         },
 
         computed: {
+
             // Verify username
             isValidUserName() {
                 const userNameRegex = /^[a-zA-Z0-9_-]{3,16}$/;
@@ -203,14 +221,12 @@
                 const passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,20}$/;
                 return this.password && passwordRegex.test(this.password);
             }
+
         },
 
 
     });
 
 </script>
-
-
-
 </body>
 </html>

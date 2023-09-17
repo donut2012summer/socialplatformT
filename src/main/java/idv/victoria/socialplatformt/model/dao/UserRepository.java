@@ -9,34 +9,68 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
 
-    // Check if email existed
+    /*
+    * Procedure HasMobileExists
+    *
+    * @param mobile
+    * @return
+    * */
     @Procedure(name = "HasMobileExists")
     Integer hasMobileExists(@Param("p_mobile") String mobile);
 
-
-    // Save or Update if userId is null
+    /*
+    * Procedure SaveOrUpdateUser
+    *
+    * @param userId, userName, mobile, email, password, biography
+    * */
     @Procedure(name = "SaveOrUpdateUser")
     void saveOrUpdateUser(@Param("p_user_id") Long userId,
                           @Param("p_user_name") String userName,
                           @Param("p_mobile") String mobile,
                           @Param("p_email") String email,
-                          @Param("p_password") String password);
+                          @Param("p_password") String password,
+                          @Param("p_biography") String biography);
 
 
 
-    // Check if email existed
+    /*
+    * Procedure FindUserByMobile
+    *
+    * @param mobile
+    * @return
+    * */
     @Procedure(name = "FindUserByMobile")
     User findUserByMobile(@Param("p_mobile") String mobile);
 
 
-    // Check if User Verified
-    @Procedure(name = "HasUserVerified")
-    User hasUserVerified(@Param("p_mobile") String mobile,
-                         @Param("p_password") String password);
-
-
+    /*
+     * Procedure FindUserByPostId
+     *
+     * @param commentId
+     * @return
+     * */
     @Procedure(name = "FindUserByPostId")
     String findUserByPostId(@Param("p_post_id") Long postId);
+
+
+    /*
+    * Procedure FindUserByCommentId
+    *
+    * @param commentId
+    * @return
+    * */
+    @Procedure(name = "FindUserByCommentId")
+    User findUserByCommentId(@Param("p_comment_id") Long commentId);
+
+
+    /*
+    * Procedure FindUserById
+    *
+    * @param userId
+    * @return
+    * */
+    @Procedure(name = "FindUserById")
+    User findUserById(@Param("p_user_id") Long id);
 
 
 }

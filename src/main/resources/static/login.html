@@ -10,46 +10,53 @@
 <body>
 
 
-<div class="container mt-5" id="app1">
+<div class="container mt-5" id="appLogin">
+
     <div class="row">
 
+        <!-- Blank -->
         <div class="col">
-            <!-- Blank -->
         </div>
 
+        <!-- Login -->
         <div class="col">
 
             <h2>Log In </h2>
 
             <!-- Mobile -->
-            <label for="mobile" class="form-label">Mobile Number</label>
-            <input v-model="mobile" placeholder="Mobile number" @keyup.enter="login" class="form-control"
+            <label for="mobile" class="form-label">帳號</label>
+            <input v-model="mobile" placeholder="請輸入手機號碼" @keyup.enter="login" class="form-control"
                    :class="{ 'is-invalid': !isValidMobile }" id="mobile"/>
 
-            <!-- Mobile Number Invalid -->
-            <div v-if="!isValidMobile" class="invalid-feedback">Invalid Mobile Number </div>
+            <!-- Mobile Invalid -->
+            <div v-if="!isValidMobile" class="invalid-feedback">手機號碼格式無效</div>
+
 
             <!-- Password -->
-            <label for="password" class="form-label">Password</label>
-            <input v-model="password" type="password" placeholder="Password" @keyup.enter="login" class="form-control mb-2"
+            <label for="password" class="form-label">密碼</label>
+            <input v-model="password" type="password" placeholder="請輸入密碼" @keyup.enter="login" class="form-control mb-2"
                    :class="{ 'is-invalid': !isValidPassword }" id="password"/>
 
             <!-- Password Invalid -->
-            <div v-if="!isValidPassword" class="invalid-feedback">Password must contain at least one lowercase letter,
-                one uppercase letter, one digit, and be between 6 and 20 characters in length.
+            <div v-if="!isValidPassword" class="invalid-feedback">密碼長度6-20，須包含1個數字，一個大寫字母以及一個小寫字母
             </div>
 
+            <!-- Direct to register.html-->
+            <p>若您沒有帳號，請點<a href="/registration.html">註冊</a>前往創立帳號</p>
 
-            <p>若您沒有帳號，請點<a href="https://www.example.com">註冊</a>前往創立帳號</p>
-            <button @click="login" type="submit" class="btn btn-primary">Sign in</button>
+
+            <!-- Log in -->
+            <button @click="login"
+                    type="submit" class="btn btn-primary"> 登入 </button>
 
         </div>
 
-
+        <!-- Blank -->
         <div class="col">
-            <!-- Blank -->
         </div>
+
     </div>
+
 </div>
 
 <!-- -------------------------------------------------- Lib ------------------------------------------------- -->
@@ -65,18 +72,23 @@
 <script src="https://cdn.jsdelivr.net/npm/axios@0.21.1/dist/axios.min.js"></script>
 
 
+<!-- --------------------------------------------- Java Script ------------------------------------------------- -->
 <script>
     new Vue({
-        el: '#app1',
+        el: '#appLogin',
         data: {
             mobile: '',
             password: ''
         },
         methods: {
+
+            // Member login, verification and redirect to article.html
             login() {
 
-                // Verified Input
+                // mobile : fit 09xxxxxxxx
                 const mobileRegex = /^09\d{8}$|^09\d{9}$/;
+
+                // Password: length 6-20, included 1 number, 1 character in lower case, 1 character in upper case,
                 const passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,20}$/;
 
                 // If Input verified
@@ -92,34 +104,47 @@
                     axios.post('/login', user).then(response =>
                     {
                         if (response.data) {
-                            // 登入成功，放入user資料
+                            // Log in success, put userId in session storage
                             sessionStorage.setItem('userId', JSON.stringify(response.data));
+
+                            // Clear the inputs
+                            this.mobile = '';
+                            this.password = '';
+
+                            // Alert success
                             Swal.fire({
-                                title: 'Registration Successful',
-                                text: 'Please login',
+                                title: '登入成功！',
                                 icon: 'success',
-                                timer: 1000, // 设置弹窗自动关闭的时间，单位为毫秒
-                                showConfirmButton: false // 隐藏确认按钮
+                                timer: 1000,
+                                showConfirmButton: false
+
                             }).then((result) => {
-                                // 在 SweetAlert 弹窗关闭后执行跳转
+                                // After Alert, redirect
                                 if (result.dismiss === Swal.DismissReason.timer) {
-                                    window.location.href = 'http://localhost:8080/article.html'; // 设置跳转的目标页面 URL
+                                    // Redirect to article.html
+                                    window.location.href = '/article.html';
+
                                 }
                             });
 
                         } else {
+                            // Alert Login failed
                             Swal.fire({
                                 position: 'top',
-                                title: 'Login failed',
+                                title: '帳密錯誤，登入失敗',
                                 timer: 1500,
                                 showConfirmButton: false,
                                 background: 'rgba(255, 255, 255, .7)'
                             });
+
                         }
                     });
                 }
             }
+
+
         },
+
         computed: {
             // Verify mobile number
             isValidMobile() {
@@ -127,7 +152,7 @@
                 return this.mobile && mobileRegex.test(this.mobile);
             },
 
-            // Verify mobile number
+            // Verify password
             isValidPassword() {
                 const passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,20}$/;
                 return this.password && passwordRegex.test(this.password);
@@ -135,10 +160,6 @@
         }
     });
 
-
 </script>
-
-
-
 </body>
 </html>

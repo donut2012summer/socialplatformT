@@ -2,13 +2,14 @@ package idv.victoria.socialplatformt.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
-import lombok.ToString;
-import org.springframework.data.jpa.repository.query.Procedure;
 
+import java.io.Serial;
+import java.io.Serializable;
 
 @Entity
 // Map procedures
 @NamedStoredProcedureQueries({
+
         // Map to procedure
         @NamedStoredProcedureQuery(
                 name = "HasMobileExists",
@@ -28,6 +29,7 @@ import org.springframework.data.jpa.repository.query.Procedure;
                         @StoredProcedureParameter(mode = ParameterMode.IN, name = "p_mobile", type = String.class),
                         @StoredProcedureParameter(mode = ParameterMode.IN, name = "p_email", type = String.class),
                         @StoredProcedureParameter(mode = ParameterMode.IN, name = "p_password", type = String.class),
+                        @StoredProcedureParameter(mode = ParameterMode.IN, name = "p_biography", type = String.class),
                 }
         ),
         @NamedStoredProcedureQuery(
@@ -56,10 +58,31 @@ import org.springframework.data.jpa.repository.query.Procedure;
                 }
         ),
 
+        @NamedStoredProcedureQuery(
+                name = "FindUserByCommentId",
+                procedureName = "FindUserByCommentId",
+                parameters = {
+                        @StoredProcedureParameter(mode = ParameterMode.IN, name = "p_comment_id", type = Long.class)
+                },
+                resultClasses = {User.class}
+        ),
+
+        @NamedStoredProcedureQuery(
+                name = "FindUserById",
+                procedureName = "FindUserById",
+                resultClasses = User.class,
+                parameters = {
+                        @StoredProcedureParameter(mode = ParameterMode.IN, name = "p_user_id", type = Integer.class)
+                }
+        )
+
 })
 @Data
-@ToString
-public class User {
+public class User implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 3L;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long userId;
@@ -67,7 +90,9 @@ public class User {
     private String userName;
     private String mobile;
     private String email;
-    private String password; // Hashed password
+
+    // Hashed password
+    private String password;
     private byte[] coverImage;
     private String biography;
 

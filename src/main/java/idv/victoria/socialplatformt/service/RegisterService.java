@@ -2,68 +2,102 @@ package idv.victoria.socialplatformt.service;
 
 import idv.victoria.socialplatformt.model.User;
 import idv.victoria.socialplatformt.model.dao.UserRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class RegisterService {
 
-    private UserRepository userRepository;
+    // Encoder
+    private final PasswordEncoder passwordEncoder;
+
+    // Logger
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
+
+    private final UserRepository userRepository;
 
     @Autowired
-    public RegisterService(UserRepository userRepository){
+    public RegisterService(PasswordEncoder passwordEncoder, UserRepository userRepository){
+        this.passwordEncoder = passwordEncoder;
         this.userRepository = userRepository;
     }
 
+    /*
+    * Save user
+    *
+    * @param User
+    * @return
+    * */
     @Transactional
     public Boolean saveUser(User user) {
         try {
 
-            // Check if Email exists
+            // Verify user
             String mobile = user.getMobile();
 
-            // If Email not existed, return false
+            // If mobile did not exist, return false
             if (userRepository.hasMobileExists(mobile) != 0) {
                 return false;
             }
 
-            // If Email not existed, save User
+            // Encode password
+            String encodedPassword = passwordEncoder.encode(user.getPassword());
+
+            // Set the encoded password
+            user.setPassword(encodedPassword);
+
+            // Save user
             userRepository.saveOrUpdateUser(
                     user.getUserId(),
                     user.getUserName(),
                     user.getMobile(),
                     user.getEmail(),
-                    user.getPassword()
+                    user.getPassword(),
+                    user.getBiography()
             );
+
             return true;
 
         } catch (Exception e) {
-            e.printStackTrace();
-            // TO-DO try to handle by logger
-            throw new RuntimeException("Error saving user with email: " + user.getEmail(), e);
+            // Handle Exception
+            logger.error("Error saving user with mobile: {}", user.getMobile(), e);
+            throw new RuntimeException("Error saving user with mobile: " + user.getMobile(), e);
         }
     }
 
-    @Transactional
-    public User findUser(String mobile) {
-        try {
-            // Check if user existed by mobile
-            User user = userRepository.findUserByMobile(mobile);
 
-            // If user did not exist
+    /*
+    * Verify user by mobile and password
+    *
+    * @param mobile, password
+    * @return
+    * */
+
+    @Transactional
+    public User findUser(String mobile, String password) {
+        try {
+
+            // Verify mobile number
+            User user = userRepository.findUserByMobile(mobile);
             if (user == null) {
                 return null;
             }
 
-            // If user existed
-            // TO-DO need to write constraints for returning user
+            // Verified password
+            if (passwordEncoder.matches(password, user.getPassword())) {
+                return user;
+            }
+
             return null;
 
         } catch (Exception e) {
-            e.printStackTrace();
-            // try to handle by logger
-            throw new RuntimeException("Error finding user by email: " + mobile, e);
+            // Handle Exception
+            logger.error("Error finding user by mobile: {}", mobile, e);
+            throw new RuntimeException("Error finding user by mobile: " + mobile, e);
         }
     }
 }
