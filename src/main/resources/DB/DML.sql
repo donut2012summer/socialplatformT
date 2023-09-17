@@ -130,7 +130,7 @@ BEGIN
 END //
 DELIMITER ;
 
--- ----- FindUserByPostId ----- --
+-- ----- DeletePostByPostId ----- --
 DELIMITER //
 CREATE PROCEDURE DeletePostByPostId(
     IN p_post_id INT
