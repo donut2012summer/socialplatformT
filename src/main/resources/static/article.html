@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Member Article</title>
+    <title> Article </title>
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
 
 </head>
@@ -14,71 +14,101 @@
 
     <!-- -------------------  文章編輯區 -------------------------- -->
     <h3>文章編輯區</h3>
-    <div class="row">
 
+    <!-- Log In : display this zone -->
+    <div v-if="userId && user" class="row">
+
+        <!-- Member info -->
         <div class="col-3">
-            <p>{{ memberName}}您好</p>
-            <p>自傳</p>
+
+            <p>{{ user.userName}} 您好</p>
+            <p>{{ user.biography}} </p>
+
+            <button @click="logout"
+                    type="submit" class="btn btn-primary">登出</button>
 
         </div>
+
+        <!-- Published article -->
         <div class="col-8">
+
             <label for="content" class="form-label">想發表什麼文章呢</label>
             <textarea v-model="content" class="form-control" id="content" rows="3"></textarea>
 
             <br>
             <button @click="postArticle"
                     type="submit" class="btn btn-primary">確認發佈</button>
+
+        </div>
+
+    </div>
+
+    <!-- Did not Log in, display this zone -->
+    <div v-else class="row">
+
+        <!-- Space -->
+        <div class="col-3"></div>
+
+        <!-- For login or register -->
+        <div class="col-8">
+
+            <p>請登入，可以發文章喔! <a href="/login.html">登入</a></p>
+            <p>若您沒有帳號，請點 <a href="/registration.html">註冊</a> 前往創立帳號</p>
+
         </div>
 
     </div>
 
     <hr>
-
     <!-- -------------------  文章專區 -------------------------- -->
     <h3>文章專區</h3>
 
     <div class="row">
+
         <div class="col-3"> <!-- space --> </div>
 
         <div class="col-8">
+
             <div>
 
                 <!-- Get posts and render in the page -->
-                <div class="card" v-for="post in posts" :key="post.postId">
+                <div class="card mt-3" v-for="post in posts" :key="post.postId">
 
                     <!-- Blank -->
-                    <div class="card-header"></div>
+                    <div class="card-header">
+                    </div>
 
                     <!--post body-->
                     <div class="card-body">
+
+                        <!-- Post content -->
                         <p class="card-text">{{post.content}}</p>
                         <p class="card-text" style="font-size: 10px"> Created by: {{post.userName}} ,
-                            Created At: {{post.createdAt}}</p>
+                            Created At: {{post.formattedCreatedAt}}</p>
+
 
                         <!-- Edite Post -->
                         <button v-if="post.userId === userId" class="btn btn-primary btn-sm"
-                                @click="editPost(post)"> Edit </button>
+                                @click="editPost(post)"> 編輯文章 </button>
+
 
                         <!-- Delete Post -->
                         <button v-if="post.userId === userId" class="btn btn-danger btn-sm"
-                                @click="deletePost(post.postId)" id="deleteBtn"> Delete </button>
+                                @click="deletePost(post.postId)" id="deleteBtn"> 刪除文章 </button>
 
-                        <!-- Add Message -->
-                        <button class="btn btn-primary btn-sm"
-                                @click="addComment(post)"> Add Comment </button>
 
-                        <!-- Toggle Message -->
+                        <!-- Add Comment -->
+                        <button v-if="post.userId === userId" class="btn btn-primary btn-sm"
+                                @click="addComment(post)"> 評論 </button>
+
+                        <!-- Show Comment -->
                         <button class="btn btn-primary btn-sm"
-                                @click="toggleComments(post)">Show Comments
+                                @click="showComments(post)">查看評論
                         </button>
 
-                        <!-- Message body-->
-                        <div v-for="comment in comments" :key="comment.commentId" >
-                            <div :class="['collapse', { 'show': isCollapsed }]" class="card card-body mt-3">
-                                <p style="font-size: 16px">
-                                    {{ comment.content }}
-                                    Created by:
-                                </p> </div>
+
+                        <!-- Dynamic Article area -->
+                        <div :id="'parent' + post.postId">
                         </div>
 
                     </div>
@@ -104,6 +134,8 @@
 <!-- axios -->
 <script src="https://cdn.jsdelivr.net/npm/axios@0.21.1/dist/axios.min.js"></script>
 
+
+<!-- --------------------------------------------- Java Script ------------------------------------------------- -->
 <script>
 
 new Vue({
@@ -112,29 +144,60 @@ new Vue({
         // Get user id in session storage
         userId: parseInt(sessionStorage.getItem('userId')),
 
-        // Keep username in session storage
-        memberName: '',
+        user: null,
 
         // Map to content element
         content: '',
 
         posts: [],
-        comments: [],
 
-        // Flag for comment toggling
-        isCollapsed: false,
+        comments: [],
 
     },
 
     //mounted: trigger getPosts when DOM content loaded
     mounted:function (){
+
         this.getPosts();
+        this.getUser();
+
     },
 
     methods:{
 
+        /* ------------- User --------------- */
+
+        // Get username and bio
+        getUser(){
+            if(this.userId){
+                // Get request
+                axios.get(`/userInfo/${this.userId}`)
+                    .then(response => {
+
+                        // Handle null biography
+                        if(response.data.biography === null){
+                            response.data.biography = '無自傳喔';
+                        }
+                        // Set response data to user for rendering by Vue in teh DOM tree
+                        this.user = response.data;
+                        console.log(this.user);
+
+                    }).catch(error => {
+                    // Handle error
+                    console.error('Error:', error);
+                });
+            }
+        },
+
+        // Log out
+        logout() {
+            this.user = null;
+            this.userId = '';
+        },
+
         /* ------------- Post --------------- */
-        // Get All Posts
+
+        // Get all posts
         getPosts(){
             // Get request
             axios.get('/getPosts')
@@ -158,9 +221,10 @@ new Vue({
         postArticle() {
             // Verify Content and login
             if (!this.content || !this.userId) {
+                // Alert
                 Swal.fire({
                     icon: 'error',
-                    title: 'Content are required!',
+                    title: '內容不可為空',
                     text: 'Please fill in all the fields.',
                 });
                 return;
@@ -177,17 +241,23 @@ new Vue({
                  .then(response => {
 
                      // If connection success
-                    if (response.status === 200) {
-                        Swal.fire({
-                            position: 'top-end',
-                            icon: 'success',
-                            title: 'Successfully published!',
-                            showConfirmButton: false,
-                            timer: 1500,
-                        });
+                    if (response) {
 
-                        // Reset content
-                        this.content = '';
+                        // Alert
+                        Swal.fire({
+                            title: '新增成功！',
+                            icon: 'success',
+                            timer: 1000,
+                            showConfirmButton: false
+
+                        }).then(() => {
+
+                            // Reload the page to show the published article
+                            location.reload();
+
+                            // Reset content
+                            this.content = '';
+                        });
 
                     } else {
 
@@ -195,7 +265,6 @@ new Vue({
                         Swal.fire({
                             icon: 'error',
                             title: 'Failed to publish, please try again',
-                            text: 'Something went wrong!',
                         });
 
                     }
@@ -203,11 +272,6 @@ new Vue({
                 .catch(error => {
                     // Handle Fetching Error
                     console.error('Error:', error);
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error fetching posts',
-                        text: 'An error occurred while fetching posts. Please try again later.',
-                    });
                 });
         },
 
@@ -224,40 +288,41 @@ new Vue({
                 cancelButtonText: 'Cancel',
 
             }).then((result) => {
+
+                // If confirmed edit post
                 if (result.isConfirmed) {
+
                     // Update value of the post content
                     post.content = result.value;
 
                     // Post request
-                    axios.post('/posts', post)
+                    axios.post('/postArticle', post)
                          .then(response => {
-                             if (response.status === 200) {
+
+                             if (response) {
+                                 // Alert success
                                  Swal.fire({
-                                     position: 'top-end',
+                                     title: '編輯成功！',
                                      icon: 'success',
-                                     title: 'Successfully modified!',
-                                     showConfirmButton: false,
-                                     timer: 1500,
+                                     timer: 1000,
+                                     showConfirmButton: false
+
                                  });
 
-                                 // Render page again
+                                 // Rerender page
                                  this.getPosts();
 
                             } else {
+                                 // Alert fail
                                  Swal.fire({
                                      icon: 'error',
-                                     title: 'Fail to edit, please try again!',
-                                     text: 'An error occurred while editing the post. Please try again later.',
+                                     title: '編輯失敗',
                                  });
                             }
                         }).catch(error => {
-                            // Handling error
+                            // Handle error
                             console.error('Error:', error);
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Error editing post',
-                                text: 'An error occurred while editing the post. Please try again later.',
-                            });
+
                     });
                 }
             });
@@ -266,162 +331,191 @@ new Vue({
         // Delete Post
         deletePost(postId) {
 
-            // Modal to check delete
+            // Alert to confirm delete
             Swal.fire({
-                title: 'Confirmed Delete?',
+                title: '確認要刪除嗎',
                 icon: 'warning',
                 showCancelButton: true,
-                confirmButtonText: 'Yes, please delete',
-                cancelButtonText: 'Cancel',
+                confirmButtonText: '是',
+                cancelButtonText: '否',
 
             }).then((result) => {
 
-                // isConfirmed: when user confirmed delete
+                // Confirmed delete
                 if (result.isConfirmed) {
 
                     // Send request
                     axios.get(`/deletePost/${postId}`)
                         .then(response => {
-                            if (response.status === 200) {
+                            // Fetch
+                            if (response) {
+
+                                // Alert success
                                 Swal.fire({
-                                    position: 'top-end',
+                                    title: '刪除成功！',
                                     icon: 'success',
-                                    title: 'Successfully deleted!',
-                                    showConfirmButton: false,
-                                    timer: 1500,
+                                    timer: 1000,
+                                    showConfirmButton: false
                                 });
 
                                 // Render page again
                                 this.getPosts();
 
                             } else {
-                                // Fail to delete
+                                // Alert fail to delete
                                 Swal.fire({
                                     icon: 'error',
-                                    title: 'Failed to delete, please try again',
-                                    text: 'Something went wrong!',
+                                    title: '刪除失敗，請重新再試',
                                 });
 
                             }
                         }).catch(error => {
+
                             // Handle fetching error
                             console.error('Error:', error);
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Error deleting post',
-                                text: 'An error occurred while deleting the post. Please try again later.',
-                            });
 
                     });
                 }
             });
         },
 
-        // Formate Date
 
 
         /* ------------- Comment --------------- */
+
         // Add comment
         addComment(post) {
-            Swal.fire({
-                title: 'Add Comment',
-                input: 'textarea',
-                showCancelButton: true,
-                confirmButtonText: 'Save',
-                cancelButtonText: 'Cancel',
 
-            }).then((result) => {
-                // If confirmed create comment
-                if (result.isConfirmed) {
+            // Verify user
+            if(this.userId){
+                // Alert to input comment
+                Swal.fire({
+                    title: '請輸入留言',
+                    input: 'textarea',
+                    showCancelButton: true,
+                    confirmButtonText: '確認',
+                    cancelButtonText: '取消',
 
-                    // Check if the text area is not null
-                    if (result.value) {
+                }).then((result) => {
 
-                        // Pack data
-                        let comment ={
-                            userId: this.userId,
-                            postId: post.postId,
-                            content: result.value
-                        }
+                    // Confirmed comment
+                    if (result.isConfirmed) {
 
-                        // Post request to add comment
-                        axios.post('/addComment', comment)
-                             .then(response => {
-                                if (response.status === 200) {
-                                    Swal.fire({
-                                        position: 'top-end',
-                                        icon: 'success',
-                                        title: 'Comment successfully added!',
-                                        showConfirmButton: false,
-                                        timer: 1500,
-                                    });
+                        // Verify text not null
+                        if (result.value) {
 
-                                    // Render page again
-                                    this.getPosts();
+                            // Pack data
+                            let comment ={
+                                userId: this.userId,
+                                postId: post.postId,
+                                content: result.value
+                            }
 
-                                } else {
-                                    // Fail to edit
-                                    Swal.fire({
-                                        icon: 'error',
-                                        title: 'Failed to add comment, please try again',
-                                        text: 'Something went wrong!',
-                                    });
+                            // Post request to add comment
+                            axios.post('/addComment', comment)
+                                .then(response => {
 
-                                }
-                            }).catch(error => {
+                                    // Fetch
+                                    if (response) {
+
+                                        //Alert success
+                                        Swal.fire({
+                                            title: '新增成功！',
+                                            icon: 'success',
+                                            timer: 1000,
+                                            showConfirmButton: false
+                                        });
+
+                                        // Render page again
+                                        this.getPosts();
+
+                                    } else {
+                                        // Alert fail comment
+                                        Swal.fire({
+                                            icon: 'error',
+                                            title: '新增失敗，請稍後再試',
+
+                                        });
+
+                                    }
+                                }).catch(error => {
+
                                 // Handle fetching error
                                 console.error('Error:', error);
-                                Swal.fire({
-                                    icon: 'error',
-                                    title: 'Error adding comment',
-                                    text: 'An error occurred while adding the comment. Please try again later.',
-                                });
 
-                        });
-                    } else {
-                        // Else if comment is null
-                        Swal.fire({
-                            icon: 'warning',
-                            title: 'Comment cannot be empty',
-                            showConfirmButton: false,
-                            timer: 1500
-                        })
+                            });
+                        } else {
+                            // If comment is null
+                            Swal.fire({
+                                icon: 'warning',
+                                title: '不可為空白喔',
+                                showConfirmButton: false,
+                                timer: 1500
+                            })
 
+                        }
                     }
-                }
-            });
+                });
+            }else {
+                // Alert log in to add comment
+                Swal.fire({
+                    icon: 'warning',
+                    title: '會員才能留言喔，請登入',
+                    showConfirmButton: false,
+                    timer: 1500
+                })
+            }
+
         },
 
-        // Get comments
-        toggleComments(post) {
+        // Show comments
+        showComments(post) {
 
-            // Convert flag of isCollapsed when click the button
-            this.isCollapsed = !this.isCollapsed;
+            // GET request
+            axios.get(`/getCommentsByPostId/${post.postId}`)
+                .then(response => {
 
-            // If isCollapsed is true
-            if (this.isCollapsed) {
+                    // If comment is not null
+                    if(response && response.data.length !== 0){
 
-                // GET request
-                axios.get(`/getCommentsByPostId/${post.postId}`)
-                    .then(response => {
-                        // Update comments
-                        this.comments = response.data;
+                        // Iterate response.data to add the html
+                        let html = '';
+                        for(let comment of response.data){
+                            html += `
+                                <div class="card card-body mt-3">
+                                <p style="font-size: 16px"> ${comment.content}</p>
+                                <p style="font-size: 10px"> Created by: ${comment.userName} ,
+                                    Created At: ${comment.formattedCreatedAt}</p>
+                                 </div>`;
 
-                    })
-                    .catch(error => {
-                        // Handle error
-                        console.error('Error:', error);
+                        }
 
-                    });
-            }
-        }
+                        // Render in the page under #parent element
+                        document.getElementById(`parent${post.postId}`).innerHTML = html;
+
+                    }else{
+                        // If comment is null, display no comment
+                        let html = `
+                                <div class="card card-body mt-3">
+                                <p style="font-size: 16px"> 暫無評論喔 </p>
+                                 </div>`;
+                        document.getElementById(`parent${post.postId}`).innerHTML = html;
+                        console.log(response.data);
+
+                    }
+
+                })
+                .catch(error => {
+                    // Handle error
+                    console.error('Error:', error);
+
+                });
+
+            },
 
     }
 })
 
 </script>
-
-
-
 </body>
 </html>

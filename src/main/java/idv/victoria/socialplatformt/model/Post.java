@@ -3,7 +3,9 @@ package idv.victoria.socialplatformt.model;
 import jakarta.persistence.*;
 import lombok.Data;
 
-import java.time.LocalDateTime;
+import java.io.Serial;
+import java.io.Serializable;
+import java.sql.Timestamp;
 
 @Entity
 // Map to Procedures
@@ -28,6 +30,12 @@ import java.time.LocalDateTime;
         ),
 
         @NamedStoredProcedureQuery(
+                name = "GetAllPostsAndComments()",
+                procedureName = "GetAllPostsAndComments()",
+                resultClasses = {Post.class}
+        ),
+
+        @NamedStoredProcedureQuery(
                 name = "FindPostById",
                 procedureName = "FindPostById",
                 parameters = {
@@ -37,33 +45,34 @@ import java.time.LocalDateTime;
         ),
 
         @NamedStoredProcedureQuery(
-                name = "DeletePostByPostId",
-                procedureName = "DeletePostByPostId",
+                name = "DeletePostAndComments",
+                procedureName = "DeletePostAndComments",
                 parameters = {
                         @StoredProcedureParameter(mode = ParameterMode.IN, name = "p_post_id", type = Long.class)
                 }
         )
 
-
-
-
 })
 
 
-
 @Data
-public class Post {
+public class Post implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 2L;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long postId;
     private Long userId;
     private String content;
     private byte[] image;
-    private LocalDateTime createdAt;
-
-    @Transient
-    private Comment comment;
+    private Timestamp createdAt;
 
     @Transient
     private String userName;
+
+    @Transient
+    private String formattedCreatedAt;
+
 }

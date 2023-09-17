@@ -3,11 +3,15 @@ package idv.victoria.socialplatformt.model;
 import jakarta.persistence.*;
 import lombok.Data;
 
-import java.time.LocalDateTime;
+import java.io.Serial;
+import java.io.Serializable;
+import java.sql.Timestamp;
 
 @Entity
+// Map to procedures
 @NamedStoredProcedureQueries({
 
+        // Map to procedure
         @NamedStoredProcedureQuery(
                 name = "FindCommentsByPostId",
                 procedureName = "FindCommentsByPostId",
@@ -34,7 +38,10 @@ import java.time.LocalDateTime;
 })
 
 @Data
-public class Comment {
+public class Comment implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -42,11 +49,11 @@ public class Comment {
     private Long postId;
     private Long userId;
     private String content;
-    private LocalDateTime createdAt;
+    private Timestamp createdAt;
 
     @Transient
-    private User user;
+    private String userName;
 
     @Transient
-    private Post post;
+    private String formattedCreatedAt;
 }

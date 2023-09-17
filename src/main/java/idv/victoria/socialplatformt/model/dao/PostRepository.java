@@ -11,21 +11,36 @@ import java.util.List;
 @Repository
 public interface PostRepository extends JpaRepository<Post,Long> {
 
-    // Call Procedure
+    /*
+    * Procedure SaveOrUpdatePost
+    *
+    * @param postId, userId, content
+    * @return
+    * */
     @Procedure(name = "SaveOrUpdatePost")
     Post saveOrUpdatePost(@Param("p_post_id") Long postId,
                           @Param("p_user_id") Long userId,
                           @Param("p_content") String content
     );
 
+
+    /*
+    * Procedure GetAllPosts
+    *
+    * @return
+    * */
     @Procedure(name = "GetAllPosts")
     List<Post> findAllPosts();
 
-    @Procedure(name = "FindPostById")
-    Post findPostById(@Param("p_post_id") Long postId);
 
-    @Procedure(name = "DeletePostByPostId")
-    void deletePostById(@Param("p_post_id") Long postId);
+    /*
+    * Procedure DeletePostAndComments
+    *
+    * @param postId
+    *
+    * */
+    @Procedure(name = "DeletePostAndComments")
+    void deletePostAndComments(@Param("p_post_id") Long postId);
 
 
 }

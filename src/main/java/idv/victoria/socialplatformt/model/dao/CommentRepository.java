@@ -12,11 +12,22 @@ import java.util.List;
 @Repository
 public interface CommentRepository extends JpaRepository<Comment, Long> {
 
-
+    /*
+    * Procedure FindCommentsByPostId
+    *
+    * @param postId
+    * @return
+    * */
     @Procedure(name = "FindCommentsByPostId")
     List<Comment> findCommentByPostId(@Param("p_post_id") Long postId);
 
 
+    /*
+    * Procedure SaveOrUpdateComment
+    *
+    * @param commentId, userId, postId, content
+    * @return
+    * */
     @Procedure(name = "SaveOrUpdateComment")
     Comment saveOrUpdateComment(@Param("p_comment_id") Long commentId,
                                 @Param("p_user_id") Long userId,

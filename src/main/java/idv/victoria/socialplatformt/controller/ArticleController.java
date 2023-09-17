@@ -1,9 +1,8 @@
 package idv.victoria.socialplatformt.controller;
 
 import idv.victoria.socialplatformt.model.Post;
+import idv.victoria.socialplatformt.model.User;
 import idv.victoria.socialplatformt.service.ArticleService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,39 +13,70 @@ import java.util.List;
 
 @RestController
 public class ArticleController {
-    private ArticleService articleService;
+
+    private final ArticleService articleService;
 
     @Autowired
     public ArticleController(ArticleService articleService){
         this.articleService = articleService;
     }
 
+    /*
+    * Sanitize and post article
+    *
+    * @param Post ( from request
+    * @return
+    * */
     @PostMapping("/postArticle")
     public ResponseEntity<Post> createPost(@RequestBody Post post) {
 
-        System.out.println(post.getContent());
-        // 驗證並清理用戶輸入
-//        String sanitizedContent = HtmlUtils.htmlEscape(post.getContent());
-//        post.setContent(sanitizedContent);
-//
-//        logger.info("Received POST request for creating a post with content: {}", sanitizedContent);
-//
+        // Prevent XSS attack from the content
+        String sanitizedContent = HtmlUtils.htmlEscape(post.getContent());
+        post.setContent(sanitizedContent);
+
+        // Save article
         Post createdPost = articleService.savePost(post);
+
         return ResponseEntity.status(HttpStatus.CREATED).body(createdPost);
     }
 
+
+    /*
+    * Get all posts
+    *
+    * @return
+    *
+    * */
     @GetMapping("/getPosts")
     public ResponseEntity<List<Post>> getAllPosts() {
         List<Post> posts = articleService.getAllPosts();
         return ResponseEntity.ok(posts);
     }
 
+    /*
+    * Delete post by postId
+    *
+    * @param postId ( path variable
+    *
+    * */
     @GetMapping("/deletePost/{postId}")
     public void deletePost(@PathVariable Long postId) {
         articleService.deletePostById(postId);
     }
 
 
+    /*
+     * Get username and bio
+     *
+     * @param userId ( path variable
+     * @return
+     * */
+    @GetMapping("/userInfo/{userId}")
+    public ResponseEntity<User> getUserName(@PathVariable Long userId){
+        User user = articleService.getUserInfo(userId);
+        return ResponseEntity.ok(user);
+
+    }
 
 
 }
