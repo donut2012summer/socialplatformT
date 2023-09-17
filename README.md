@@ -40,6 +40,6 @@ https://drive.google.com/file/d/1NrRUCvCBFtTV_Vi74azRZL2T-PkoA6qH/view?usp=drive
 3. 架構: web MVC (RESTful style
    實作Transaction、使用 MySQL 關聯式資料庫
 4. Stored Procedure 及參數化查詢，防止SQL injection
-5. Spring 提供的 HtmlUtils.htmlEscape 過濾內容，防止XSS攻擊
-6. 密碼經由 Spring Security crypto BCryptPasswordEncoder 加密後存入資料庫，登入時驗證
+5. Spring 提供的 HtmlUtils.htmlEscape 轉義內容，防止XSS攻擊
+6. 密碼經由 Spring Security crypto BCryptPasswordEncoder 加鹽哈希處理後存入資料庫，登入時驗證
 
