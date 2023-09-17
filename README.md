@@ -5,15 +5,14 @@ https://drive.google.com/file/d/1NrRUCvCBFtTV_Vi74azRZL2T-PkoA6qH/view?usp=drive
 
 如何使用：
 1. 下載zip檔案解壓縮
-2. 使用IDE引入，需要JDK17
-3. 於資料庫中執行 DML, DDL (放在 src/main/resources/DB
-4. 於src/main/resources/application.properties 中更新資料庫帳密以及URL
-5. 編譯及執行專案
-6. 入口網頁 article.html (放在 src/main/resources/static
+2. 於資料庫中執行 DML, DDL (放在 src/main/resources/DB
+3. 於src/main/resources/application.properties 中更新資料庫帳密以及URL
+4. JDK 編譯及執行專案
+5. 入口網頁 article.html (放在 src/main/resources/static
 
 實現功能：
 1. 註冊 register.html
-   - 驗證輸入是否符合格式，若不符合，紅字提示會一直顯示直到符合規則。
+   - 驗證輸入是否符合格式(正規表達式)，若不符合，紅字提示會一直顯示直到符合規則。
    - 點選註冊
      以手機為帳號，後端驗證，若有註冊過，會提示已經有註冊過無法註冊
      無註冊過的話，將資料送入資料庫
